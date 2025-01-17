@@ -29,7 +29,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.getboolean('db', 'track_mo
 # 初始化 SQLAlchemy
 db.init_app(app)
 
-
 # 读取 webpack 生成的 manifest.json 文件
 def get_manifest():
     manifest_path = os.path.join(os.path.dirname(__file__), 'public', 'manifest.json')
@@ -41,16 +40,17 @@ def get_manifest():
 # favicon.ico 路由
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory('public', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 # Assets 路由
 @app.route('/assets/<path:filename>')
 def protected_static(filename):
-    return send_from_directory('static', filename)
+    return send_from_directory('public', filename)
 
 # 首页路由，展示表格
 @app.route('/', methods=['GET'])
 def index(page=1):
+    app_name = config.get('app', 'name', 'My APP')
     # 获取静态文件的真实路径
     manifest = get_manifest()
     # 自动获取所有 JS 文件路径
@@ -63,7 +63,7 @@ def index(page=1):
         url_for('protected_static', filename=manifest[key])
         for key in manifest if key.endswith('.css')
     ]
-    return render_template('index.html', js_files=js_files, css_files=css_files)
+    return render_template('index.html', app_name=app_name, js_files=js_files, css_files=css_files)
 
 
 # 启动应用

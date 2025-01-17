@@ -74,3 +74,4 @@ uwsgi.ini
 
 public/
 node_modules/
+yarn.lock

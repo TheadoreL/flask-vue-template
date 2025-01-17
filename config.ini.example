@@ -1,6 +1,12 @@
 [app]
 name=
 
+[log]
+name = app
+level = DEBUG
+log_to_file = true
+log_file = logs/app.log
+
 [db]
 type=sqlite
 uri=sqlite:///database/mydb.db

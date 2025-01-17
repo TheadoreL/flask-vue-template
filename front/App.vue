@@ -1,6 +1,7 @@
 <template>
   <div class="common-layout">
-
+    <!-- vue-router view -->
+    <router-view />
   </div>
 </template>
 

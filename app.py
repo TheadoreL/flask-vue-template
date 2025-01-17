@@ -19,7 +19,7 @@ config = Config(f"{project_root}/config.ini")
 logger = Logger(config, project_root).get_logger()
 
 # 创建 Flask 应用
-app = Flask(__name__, static_folder='public')
+app = Flask(__name__, static_folder='statics')
 
 # 配置数据库
 app.secret_key = secrets.token_hex(16)
@@ -31,7 +31,7 @@ db.init_app(app)
 
 # 读取 webpack 生成的 manifest.json 文件
 def get_manifest():
-    manifest_path = os.path.join(os.path.dirname(__file__), 'public', 'manifest.json')
+    manifest_path = os.path.join(os.path.dirname(__file__), 'statics', 'manifest.json')
     if os.path.exists(manifest_path):
         with open(manifest_path, 'r') as f:
             return json.load(f)
@@ -42,10 +42,15 @@ def get_manifest():
 def favicon():
     return send_from_directory('public', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+# public 路由
+@app.route('/public/<path:filename>')
+def public(filename):
+    return send_from_directory('public', filename)
+
 # Assets 路由
 @app.route('/assets/<path:filename>')
 def protected_static(filename):
-    return send_from_directory('public', filename)
+    return send_from_directory('statics', filename)
 
 # 首页路由，展示表格
 @app.route('/', methods=['GET'])

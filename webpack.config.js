@@ -20,7 +20,7 @@ const environment = config.environment || 'development'; // 默认为 developmen
 module.exports = {
   entry: './front/app.ts',
   output: {
-    path: path.resolve(__dirname, 'public'),  // 输出到 Flask 的静态目录
+    path: path.resolve(__dirname, 'statics'),  // 输出到 Flask 的静态目录
     filename: 'js/[name].[contenthash].js',
     chunkFilename: 'js/[name].[contenthash].js',
   },
@@ -105,7 +105,7 @@ module.exports = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: [
           '**/*',
-         '!favicon.ico' // 排除特定文件
+          '!.gitkeep'
         ],
       cleanStaleWebpackAssets: true, // 清理旧文件
       protectWebpackAssets: false, // 禁止删除 Webpack 生成的文件
@@ -126,12 +126,12 @@ module.exports = {
 
     AutoImport({
       resolvers: [ElementPlusResolver()],
-      dts: 'public/auto-imports.d.ts',  // 自动生成类型声明文件
+      dts: 'statics/auto-imports.d.ts',  // 自动生成类型声明文件
     }),
 
     Components({
       resolvers: [ElementPlusResolver()],
-      dts: 'public/components.d.ts',  // 自动生成组件类型声明文件
+      dts: 'statics/components.d.ts',  // 自动生成组件类型声明文件
     }),
   ],
 };

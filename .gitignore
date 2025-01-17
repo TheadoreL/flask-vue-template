@@ -67,11 +67,11 @@ venv.bak/
 *.local
 
 logs/
-database/
+instance/
 config.ini
 *.service
 uwsgi.ini
 
-public/
+statics/
 node_modules/
 yarn.lock

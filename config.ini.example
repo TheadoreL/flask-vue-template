@@ -9,5 +9,5 @@ log_file = logs/app.log
 
 [db]
 type=sqlite
-uri=sqlite:///database/mydb.db
+uri=sqlite:///mydb.db
 track_modifications=False

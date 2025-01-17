@@ -1,0 +1,7 @@
+[app]
+name=
+
+[db]
+type=sqlite
+uri=sqlite:///database/mydb.db
+track_modifications=False

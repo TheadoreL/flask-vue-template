@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App</title>
+    <!-- 其他样式和元数据 -->
+    {% for css in css_files %}
+    <link href="{{ css }}" rel="stylesheet">
+    {% endfor %}
+</head>
+<body>
+
+<div id="app">
+    <!-- 页面内容 -->
+</div>
+
+{% for js in js_files %}
+    <script src="{{ js }}"></script>
+{% endfor %}
+
+</body>
+</html>

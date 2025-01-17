@@ -1,0 +1,76 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+
+# Cython debug symbols
+cython_debug/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Often creates a build/ directory and a dist/ directory.
+#  The files should not be included in version control.
+build/
+dist/
+*.spec
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# mypy
+.mypy_cache/
+
+# pyenv
+.python-version
+
+# pytest
+.cache/
+
+# pytype
+.pytype/
+
+# virtualenv
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# other environment files
+*.env
+*.env.local
+*.env.production
+*.env.test
+
+# local config files
+*.local
+
+logs/
+database/
+config.ini
+*.service
+uwsgi.ini
+
+public/
+node_modules/

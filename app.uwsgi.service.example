@@ -1,0 +1,15 @@
+[Unit]
+Description=uWSGI %APPNAME% Server
+After=syslog.target
+
+[Service]
+ExecStart=%PATH-TO-APP%/.venv/bin/uwsgi --ini %PATH-TO-APP%/uwsgi.ini
+RuntimeDirectory=uwsgi-%APPNAME%
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target

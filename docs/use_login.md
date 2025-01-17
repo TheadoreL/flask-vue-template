@@ -50,11 +50,19 @@
       - **check_password(password)**: 该方法用于检查给定的明文密码与存储的加密密码是否匹配，使用 `check_password_hash` 函数进行验证。
     
     此模型使用 SQLAlchemy ORM 进行数据库操作，确保了数据的安全性和易用性。
+
+   修改 `modules/models/__init__.py` 新增：
+
+   ```python
+   # 导入模型
+   from .user import User
+   ```
    
 
 2. 修改 `app.py` 添加登录路由：
 
     ```python
+    from flask import Flask, render_template, url_for, send_from_directory, request, redirect, session
     from modules.models import db, User
     from functools import wraps
     
@@ -100,90 +108,102 @@
 
     ```python
     import os
-    import random
-    import string
-    from flask import Flask
-    from flask_sqlalchemy import SQLAlchemy
-    from werkzeug.security import generate_password_hash
-    
-    # 初始化 Flask 和 SQLAlchemy
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ip_addresses.db'  # 数据库文件路径
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db = SQLAlchemy(app)
-    
-    # 用户模型
-    class User(db.Model):
-        __tablename__ = 'users'
-        id = db.Column(db.Integer, primary_key=True)
-        username = db.Column(db.String(150), nullable=False, unique=True)
-        password_hash = db.Column(db.String(200), nullable=False)
-        update_token = db.Column(db.String(200), nullable=False, unique=True)
-    
-        def set_password(self, password):
-            self.password_hash = generate_password_hash(password)
-    
-    # 启动 Flask 应用上下文
+import random
+import string
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash
+from modules.config.config import Config
+
+# 获取当前脚本文件所在的目录
+current_directory = os.path.dirname(os.path.abspath(__file__))
+
+# 获取项目根目录
+project_root = os.path.abspath(os.path.join(current_directory, '.'))
+
+# 读取配置
+config = Config(f"{project_root}/config.ini")
+
+# 初始化 Flask 和 SQLAlchemy
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = config.get('db', 'uri')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.getboolean('db', 'track_modifications')
+db = SQLAlchemy(app)
+
+# 用户模型
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(150), nullable=False, unique=True)
+    password_hash = db.Column(db.String(200), nullable=False)
+    update_token = db.Column(db.String(200), nullable=False, unique=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+# 启动 Flask 应用上下文
+with app.app_context():
+    db.create_all()  # 创建表结构（如果表不存在）
+
+# 生成随机 token
+def generate_token(length=50):
+    characters = string.ascii_letters + string.digits + "!@#$%^&*()"
+    return ''.join(random.choice(characters) for _ in range(length))
+
+# 添加新用户
+def add_user():
+    username = input("请输入用户名: ").strip()
+    password = input("请输入密码: ").strip()
+
+    # 检查用户名是否已存在
     with app.app_context():
-        db.create_all()  # 创建表结构（如果表不存在）
-    
-    # 生成随机 token
-    def generate_token(length=50):
-        characters = string.ascii_letters + string.digits + "!@#$%^&*()"
-        return ''.join(random.choice(characters) for _ in range(length))
-    
-    # 添加新用户
-    def add_user():
-        username = input("请输入用户名: ").strip()
-        password = input("请输入密码: ").strip()
-    
-        # 检查用户名是否已存在
-        with app.app_context():
-            existing_user = User.query.filter_by(username=username).first()
-            if existing_user:
-                print(f"用户名 '{username}' 已存在！")
-                return
-    
-            # 创建新用户
-            new_user = User(username=username)
-            new_user.set_password(password)
-            new_user.update_token = generate_token()
-            db.session.add(new_user)
-            db.session.commit()
-    
-            print(f"用户 '{username}' 添加成功！")
-            print(f"更新地址 Token: {new_user.update_token}")
-    
-    # 显示所有用户
-    def list_users():
-        with app.app_context():
-            users = User.query.all()
-            print(f"{'ID':<5} {'用户名':<20} {'Token':<50}")
-            print("=" * 80)
-            for user in users:
-                print(f"{user.id:<5} {user.username:<20} {user.update_token:<50}")
-    
-    # 主菜单
-    def main():
-        while True:
-            print("\n用户管理菜单:")
-            print("1. 添加用户")
-            print("2. 查看所有用户")
-            print("3. 退出")
-    
-            choice = input("请选择操作: ").strip()
-            if choice == "1":
-                add_user()
-            elif choice == "2":
-                list_users()
-            elif choice == "3":
-                print("退出程序。")
-                break
-            else:
-                print("无效选择，请重新输入！")
-    
-    if __name__ == "__main__":
-        main()
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            print(f"用户名 '{username}' 已存在！")
+            return
+
+        # 创建新用户
+        new_user = User(username=username)
+        new_user.set_password(password)
+        new_user.update_token = generate_token()
+        db.session.add(new_user)
+        db.session.commit()
+
+        print(f"用户 '{username}' 添加成功！")
+        print(f"更新地址 Token: {new_user.update_token}")
+
+# 显示所有用户
+def list_users():
+    with app.app_context():
+        users = User.query.all()
+        print(f"{'ID':<5} {'用户名':<20} {'Token':<50}")
+        print("=" * 80)
+        for user in users:
+            print(f"{user.id:<5} {user.username:<20} {user.update_token:<50}")
+
+# 主菜单
+def main():
+    while True:
+        print("\n用户管理菜单:")
+        print("1. 添加用户")
+        print("2. 查看所有用户")
+        print("3. 退出")
+
+        choice = input("请选择操作: ").strip()
+        if choice == "1":
+            add_user()
+        elif choice == "2":
+            list_users()
+        elif choice == "3":
+            print("退出程序。")
+            break
+        else:
+            print("无效选择，请重新输入！")
+
+if __name__ == "__main__":
+    main()
+
+
 
     ```
 

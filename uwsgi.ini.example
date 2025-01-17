@@ -1,8 +1,8 @@
 [uwsgi]
 #application's base folder
-base = %PATH-TO-APP%/
+base = %PATH-TO-APP%
 
-chdir = %PATH-TO-APP%/
+chdir = %PATH-TO-APP%
 
 #python module to import
 wsgi-file = app.py

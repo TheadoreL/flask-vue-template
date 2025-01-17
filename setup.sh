@@ -3,17 +3,28 @@
 # 1. 获取当前脚本所在路径
 DIR=$(cd "$(dirname "$0")" && pwd)
 
-# 2. 创建虚拟环境
-echo "Creating virtual environment..."
-python -m venv .venv
-source .venv/bin/activate  # Unix/macOS
-#.venv\Scripts\activate  # Windows
+# 2. 检查 python 命令，如果找不到 python，尝试 python3
+if ! command -v python &> /dev/null; then
+    if command -v python3 &> /dev/null; then
+        python=python3
+    else
+        echo "Python not found. Please install Python."
+        exit 1
+    fi
+else
+    python=python
+fi
 
-# 3. 安装 requirements
+# 3. 创建虚拟环境
+echo "Creating virtual environment..."
+$python -m venv .venv
+source .venv/bin/activate  # Unix/macOS
+
+# 4. 安装 requirements
 echo "Installing requirements..."
 pip install -r requirements.txt
 
-# 4. 判断 config.ini 是否存在
+# 5. 判断 config.ini 是否存在
 if [ -f config.ini ]; then
     # 如果 config.ini 存在，读取其中的 app name
     APPNAME=$(sed -n '/^\[app\]/,/^\[/{s/^\s*name\s*=\s*\(.*\)/\1/p}' config.ini)
@@ -37,28 +48,28 @@ else
         fi
 
         # 更新 config.ini.example 和 config.ini 中的 app name
-        sed -i "/^\[app\]/,/^\[/{s/^\s*name\s*=.*$/name=$APPNAME/}" config.ini.example
+        sed -i '' "s/^\s*name\s*=.*$/name=$APPNAME/" config.ini.example
     fi
 fi
 
-# 5. 更新 config.ini 中的 app name
-sed -i "/^\[app\]/,/^\[/{s/^\s*name\s*=.*$/name=$APPNAME/}" config.ini
+# 6. 更新 config.ini 中的 app name
+sed -i '' "s/^\s*name\s*=.*$/name=$APPNAME/" config.ini
 
-# 6. 复制 uwsgi 配置文件
+# 7. 复制 uwsgi 配置文件
 echo "Setting up uwsgi.ini..."
 cp uwsgi.ini.example uwsgi.ini
 
-# 7. 替换 %PATH-TO-APP% 为当前路径
-sed -i "s|%PATH-TO-APP%|$DIR|g" uwsgi.ini
+# 8. 替换 %PATH-TO-APP% 为当前路径
+sed -i '' "s|%PATH-TO-APP%|$DIR|g" uwsgi.ini
 
-# 8. 设置系统服务文件（适用于 Linux 或 macOS）
+# 9. 设置系统服务文件（适用于 Linux 或 macOS）
 echo "Setting up system service..."
 cp app.uwsgi.service.example "$APPNAME".uwsgi.service
-sed -i "s|%PATH-TO-APP%|$DIR|g" "$APPNAME".uwsgi.service
-sed -i "s|%APPNAME%|$APPNAME|g" "$APPNAME".uwsgi.service
+sed -i '' "s|%PATH-TO-APP%|$DIR|g" "$APPNAME".uwsgi.service
+sed -i '' "s|%APPNAME%|$APPNAME|g" "$APPNAME".uwsgi.service
 
-# 9. 安装npm包
+# 10. 安装 npm 包
 yarn
 
-# 10. 完成设置
+# 11. 完成设置
 echo "Setup complete! You can now run your Flask app."
